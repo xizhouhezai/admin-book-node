@@ -5,8 +5,12 @@ const {
   CODE_ERROR
 } = require('../utils/constant')
 
+const jwtAuth = require('./jwt')
+
 // 注册路由
 const router = express.Router()
+
+router.use(jwtAuth)
 
 router.get('/', function(req, res) {
   res.send('欢迎来到管理后台')
