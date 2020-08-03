@@ -8,9 +8,11 @@ const jwt = require('jsonwebtoken')
 
 const Result = require('../models/Result')
 
-const { login } = require('../services/user')
+const { login, findUser } = require('../services/user')
 
 const { PRIVATE_KEY, JWT_EXPIRED } = require('../utils/constant')
+
+const { decode } = require('../utils')
 
 router.post('/login',
   [
@@ -43,7 +45,24 @@ router.post('/login',
 })
 
 router.get('/info', function(req, res, next) {
-  res.json('user info...')
+  const decoded = decode(req)
+  if (decoded && decoded.username) {
+    findUser(decoded.username).then(user => {
+      if (user) {
+        user.roles = [user.role]
+        new Result(user, '获取用户信息成功').success(res)
+      } else {
+        new Result('获取用户信息失败').fail(res)
+      }
+    })
+  } else {
+    new Result('用户信息解析失败').fail(res)
+  }
+})
+
+// 前端用户注册接口
+router.post('/register', (req, res, next) => {
+  new Result('获取用户信息成功').success(res)
 })
 
 module.exports = router

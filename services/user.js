@@ -1,4 +1,4 @@
-const { querySql } = require('../db')
+const { querySql, queryOne } = require('../db')
 
 const { md5 } = require('../utils')
 
@@ -11,6 +11,16 @@ function login(username, password) {
   return querySql(sql)
 }
 
+function findUser(username) {
+  const sql = `select * from admin_user where username='${username}'`
+  return queryOne(sql)
+}
+
+function register(data) {
+  const sql = `INSERT INTO user (  ) VALUES (  )`
+}
+
 module.exports = {
-  login
+  login,
+  findUser
 }
