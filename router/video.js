@@ -46,21 +46,23 @@ router.get('/check/chunk', (req, resp) => {
   })
 })
 
+// 合并分片的文件
 router.get('/merge', (req, resp) => {
-  let query = req.query
-  let md5 = query.md5
-  let size = query.size
-  let fileName = query.fileName
+  const { md5, fileName } = req.query
+
   console.log(md5, fileName)
-  mergeFiles(path.join(`${UPLOAD_PATH}/video`, md5), `${UPLOAD_PATH}/video`, fileName, size)
-  new Result('合并成功').success(resp)
+  mergeFiles(path.join(`${UPLOAD_PATH}/video`, md5), `${UPLOAD_PATH}/video`, fileName).then(res => {
+    new Result(res).success(resp)
+  }, err => {
+    new Result('合并失败').fail(res)
+  })
 })
 
 router.post('/upload', (req, resp) => {
   var form = new formidable.IncomingForm({
     uploadDir: `${UPLOAD_PATH}/video`
   })
-  console.log('req--------->', req)
+
   form.parse(req, function (err, fields, file) {
     let index = fields.index
     let total = fields.total
@@ -74,54 +76,43 @@ router.post('/upload', (req, resp) => {
           new Result({
             index: index
           }, successLog).success(resp)
-          // resp.send({
-          //   stat: 1,
-          //   desc: index
-          // })
         },
         errorLog => {
           new Result({
             desc: errorLog
           }).success(resp)
-          // resp.send({
-          //   stat: 0,
-          //   desc: 'Error'
-          // })
         }
       )
     })
   })
-
-
-  // 文件夹是否存在, 不存在则创建文件
-  function folderIsExit(folder) {
-    console.log('folderIsExit', folder)
-    return new Promise(async (resolve, reject) => {
-      let result = await fs.ensureDirSync(path.join(folder))
-      console.log('result----', result)
-      resolve(true)
-    })
-  }
-  // 把文件从一个目录拷贝到别一个目录
-  function copyFile(src, dest) {
-    let promise = new Promise((resolve, reject) => {
-      fs.rename(src, dest, err => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve('copy file:' + dest + ' success!')
-        }
-      })
-    })
-    return promise
-  }
 })
+
+// 文件夹是否存在, 不存在则创建文件
+function folderIsExit(folder) {
+  return new Promise(async (resolve, reject) => {
+    let result = await fs.ensureDirSync(path.join(folder))
+    console.log('result----', result)
+    resolve(true)
+  })
+}
+// 把文件从一个目录拷贝到别一个目录
+function copyFile(src, dest) {
+  return new Promise((resolve, reject) => {
+    fs.rename(src, dest, err => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve('copy file:' + dest + ' success!')
+      }
+    })
+  })
+}
 
 // 获取文件Chunk列表
 async function getChunkList(filePath, folderPath, callback) {
   let isFileExit = await isExist(filePath)
   let result = {}
-  // 如果文件(文件名, 如:node-v7.7.4.pkg)已在存在, 不用再继续上传, 真接秒传
+  // 如果文件已在存在, 不用再继续上传, 真接秒传
   if (isFileExit) {
     result = {
       file: {
@@ -177,7 +168,7 @@ function listDir(path) {
   })
 }
 // 合并文件
-async function mergeFiles(srcDir, targetDir, newFileName, size) {
+async function mergeFiles(srcDir, targetDir, newFileName) {
   console.log(...arguments)
   let targetStream = fs.createWriteStream(path.join(targetDir, newFileName))
   let fileArr = await listDir(srcDir)
@@ -186,8 +177,14 @@ async function mergeFiles(srcDir, targetDir, newFileName, size) {
     fileArr[i] = srcDir + '/' + fileArr[i]
   }
   console.log(fileArr)
-  concat(fileArr, path.join(targetDir, newFileName), () => {
-    console.log('Merge Success!')
+  return new Promise((resolve, reject) => {
+    concat(fileArr, path.join(targetDir, newFileName), (err) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve('合并成功')
+    })
   })
 }
 
