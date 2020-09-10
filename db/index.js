@@ -4,7 +4,8 @@ const {
   host,
   user,
   password,
-  database
+  database,
+  port
 } = require('./config')
 
 const debug = require('../utils/constant').debug
@@ -14,7 +15,8 @@ function connect() {
     host,
     user,
     password,
-    database
+    database,
+    port
   })
 }
 
