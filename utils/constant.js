@@ -2,9 +2,9 @@ const { env } = require('./env')
 
 const UPLOAD_PATH = env === 'dev' ? 'D:/static/upload/admin-book' : '/workspace/upload/admin-book'
 
-const OLD_UPLOAD_URL = env === 'dev' ? 'https://book.youbaobao.xyz/book/res/img' : 'https://www.youbaobao.xyz/book/res/img'
+const OLD_UPLOAD_URL = env === 'dev' ? 'http://localhost:8089/admin-book/res/img' : 'http://file.xizhouhezai.com/admin-book/res/img'
 
-const UPLOAD_URL = env === 'dev' ? 'http://localhost:8089/admin-book' : 'https://file.xizhouhezai.com/admin-book'
+const UPLOAD_URL = env === 'dev' ? 'http://localhost:8089/admin-book' : 'http://file.xizhouhezai.com/admin-book'
 
 module.exports = {
   CODE_ERROR: -1,

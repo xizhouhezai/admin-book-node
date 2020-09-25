@@ -12,11 +12,11 @@ if (env === 'dev') {
   }
 } else {
   options = {
-    host: '',
+    host: '148.70.23.39',
     user: 'root',
-    password: '',
+    password: 'qq19930220',
     database: 'book',
-    port: ''
+    port: 3307
   }
 }
 

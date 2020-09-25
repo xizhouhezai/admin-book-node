@@ -69,7 +69,28 @@ class Book {
   }
 
   // 更新电子书
-  createBookFromData(data) {}
+  createBookFromData(data) {
+    this.fileName = data.fileName
+    this.cover = data.coverPath
+    this.title = data.title
+    this.author = data.author
+    this.publisher = data.publisher
+    this.bookId = data.fileName
+    this.language = data.language
+    this.rootFile = data.rootFile
+    this.originalName = data.originalName
+    this.path = data.path || data.filePath
+    this.filePath = data.path || data.filePath
+    this.unzipPath = data.unzipPath
+    this.coverPath = data.coverPath
+    this.createUser = data.username
+    this.createDt = new Date().getTime()
+    this.updateDt = new Date().getTime()
+    this.updateType = data.updateType === 0 ? data.updateType : 1
+    this.category = data.category || 99
+    this.categoryText = data.categoryText || '自定义'
+    this.contents = data.contents || []
+  }
 
   parse() {
     return new Promise((resolve, reject) => {
@@ -251,6 +272,59 @@ class Book {
         }
       })
       return contentsTree
+    }
+  }
+
+  // 生成数据库字段
+  toDb() {
+    return {
+      fileName: this.fileName,
+      cover: this.coverPath,
+      title: this.title,
+      author: this.author,
+      publisher: this.publisher,
+      bookId: this.fileName,
+      language: this.language,
+      rootFile: this.rootFile,
+      originalName: this.originalName,
+      filePath: this.filePath,
+      unzipPath: this.unzipPath,
+      coverPath: this.coverPath,
+      createUser: this.createUser,
+      createDt: this.createDt,
+      updateDt: this.updateDt,
+      updateType: this.updateType,
+      category: this.category,
+      categoryText: this.categoryText
+    }
+  }
+
+  // 删除重复上传图书
+  reset() {
+    console.log(this.fileName)
+    if (Book.pathExists(this.filePath)) {
+      fs.unlinkSync(Book.genPath(this.filePath))
+    }
+    if (Book.pathExists(this.coverPath)) {
+      fs.unlinkSync(Book.genPath(this.coverPath))
+    }
+    if (Book.pathExists(this.unzipPath)) {
+      fs.rmdirSync(Book.genPath(this.unzipPath), { recursive: true })
+    }
+  }
+
+  static genPath(path) {
+    if (!path.startsWith('/')) {
+      path = `/${path}`
+    }
+    return `${UPLOAD_PATH}${path}`
+  }
+
+  static pathExists(path) {
+    if (path.startsWith(UPLOAD_PATH)) {
+      return fs.existsSync(path)
+    } else {
+      return fs.existsSync(Book.genPath(path))
     }
   }
 }
